@@ -1,0 +1,548 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - hazinDNS</title>
+    <link rel="icon" type="image/png" href="~/favicon.png">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .price-block {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-icon:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
+        }
+        
+        .btn-icon i {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .btn-icon[data-wishlist-button].in-wishlist i {
+            color: #dc3545;
+        }
+
+        .product-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%; /* Соотношение сторон 4:3 */
+            overflow: hidden;
+        }
+
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Изменено с cover на contain */
+            background-color: #fff;
+            padding: 1rem;
+        }
+
+        .product-card .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card .card-text {
+            flex-grow: 1;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 1rem 0;
+            white-space: nowrap;
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+            display: inline-block;
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1.5rem;
+        }
+
+        #profileItem {
+            display: none;
+        }
+
+        .btn-outline-primary:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+
+        .d-flex.gap-2 {
+            display: flex;
+            gap: 0.5rem !important;
+        }
+
+        .btn-outline-primary.in-wishlist {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .bi-heart-fill {
+            color: #6c757d;
+        }
+
+        .in-wishlist .bi-heart-fill {
+            color: #dc3545 !important;
+        }
+
+        .btn-outline-primary.in-wishlist:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-outline-primary.in-wishlist:hover i {
+            color: white !important;
+        }
+
+        #toast-container > div {
+            opacity: 1;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .search-form {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">hazinDNS</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Главная</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Category" asp-action="Index">
+                                <i class="bi bi-grid"></i> Категории
+                            </a>
+                        </li>
+                        <li class="nav-item flex-grow-1">
+                            <form class="search-form" asp-controller="Home" asp-action="Search" method="get" id="searchForm">
+                                <input class="search-input" type="text" name="query" placeholder="Поиск товаров..." />
+                                <i class="bi bi-search search-icon"></i>
+                            </form>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Wishlist" asp-action="Index">
+                                    <i class="bi bi-heart"></i> Список желаемого
+                                </a>
+                            </li>
+                            <li class="nav-item" id="balanceItem">
+                                <a class="nav-link text-dark" href="/Balance">
+                                    <i class="bi bi-wallet2"></i> Баланс: <span id="userBalance">0</span> ₽
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="#" onclick="openCart()">
+                                    <i class="bi bi-cart"></i> Корзина (<span id="cartItemCount">0</span>)
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/Profile">
+                                    <i class="bi bi-person"></i> Личный кабинет
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/Home/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Войти
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - hazinDNS - <a asp-area="" asp-controller="Home" asp-action="UserGuide">Руководство пользователя</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Конфигурация Toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "timeOut": "3000"
+        };
+
+        function updateUserBalance() {
+            fetch('/Balance/GetBalance')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('userBalance').textContent = data.balance.toLocaleString('ru-RU');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('Ошибка при обновлении баланса');
+                });
+        }
+
+        window.onload = function() {
+            if (document.getElementById('userBalance')) {
+                updateUserBalance();
+            }
+            updateCartCount();
+        }
+
+        // Функция выхода
+        function logout() {
+            fetch('/api/Auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                toastr.success('Вы успешно вышли из системы');
+                window.location.href = '/Home/Login';
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+                toastr.error('Произошла ошибка при выходе из системы');
+                window.location.href = '/Home/Login';
+            });
+        }
+
+        function updateCartCount() {
+            fetch('/Cart/GetCartCount', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const cartCountElement = document.getElementById('cartItemCount');
+                if (cartCountElement) {
+                    cartCountElement.textContent = data.count || 0;
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart count:', error);
+            });
+        }
+
+        function addToCart(productId) {
+            console.log('Adding product to cart:', productId);
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (response.status === 401) {
+                    toastr.error('Необходима авторизация');
+                    window.location.href = '/Home/Login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+                console.log('Response data:', data);
+                if (data.success) {
+                    updateCartCount();
+                    toastr.success('Товар добавлен в корзину');
+                    if (window.location.pathname === '/Cart' || window.location.pathname === '/Cart/Index') {
+                        window.location.reload();
+                    }
+                } else if (data.message) {
+                    toastr.warning(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Произошла ошибка при добавлении товара в корзину');
+            });
+        }
+
+        function removeFromCart(productId) {
+            Swal.fire({
+                title: 'Удаление товара',
+                text: 'Вы действительно хотите удалить этот товар из корзины?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Да',
+                cancelButtonText: 'Отмена',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Cart/RemoveFromCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success('Товар успешно удален из корзины');
+                            window.location.reload();
+                        }
+                        else {
+                            toastr.error('Не удалось удалить товар');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('Произошла ошибка при удалении товара');
+                    });
+                }
+            });
+        }
+
+        function clearCart() {
+            Swal.fire({
+                title: 'Очистка корзины',
+                text: 'Вы действительно хотите очистить корзину?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Да',
+                cancelButtonText: 'Отмена',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/Cart/ClearCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success('Корзина успешно очищена');
+                            window.location.reload();
+                        }
+                        else {
+                            toastr.error('Не удалось очистить корзину');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('Произошла ошибка при очистке корзины');
+                    });
+                }
+            });
+        }
+
+        function openCart() {
+            fetch('/Cart')
+                .then(response => {
+                    if (response.status === 401) {
+                        toastr.error('Необходима авторизация');
+                        window.location.href = '/Home/Login';
+                        return;
+                    }
+                    window.location.href = '/Cart';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Обновляем счетчик при загрузке страницы
+        window.addEventListener('load', updateCartCount);
+        
+        // Функция для проверки товаров в списке желаемого
+        function checkWishlistItems() {
+            document.querySelectorAll('[data-wishlist-button]').forEach(button => {
+                const productId = button.getAttribute('data-product-id');
+                fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isInWishlist) {
+                            button.classList.add('in-wishlist');
+                            button.querySelector('i').classList.add('text-danger');
+                        }
+                    });
+            });
+        }
+
+        function addToWishlist(productId) {
+            const button = document.querySelector(`[data-product-id="${productId}"]`);
+            // Если товар уже в списке желаемого, удаляем его
+            if (button.classList.contains('in-wishlist')) {
+                fetch('/Wishlist/RemoveFromWishlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(productId)
+                })
+                .then(response => {
+                    if (response.status === 401) {
+                        toastr.error('Необходима авторизация');
+                        window.location.href = '/Home/Login';
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.success) {
+                        button.classList.remove('in-wishlist');
+                        button.querySelector('i').classList.remove('text-danger');
+                        toastr.success('Товар удален из списка желаемого');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('Произошла ошибка при удалении товара');
+                });
+                return;
+            }
+            // Если товара нет в списке желаемого, добавляем его
+            fetch('/Wishlist/AddToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(productId)
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    toastr.error('Необходима авторизация');
+                    window.location.href = '/Home/Login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+                if (data.success) {
+                    button.classList.add('in-wishlist');
+                    button.querySelector('i').classList.add('text-danger');
+                    toastr.success('Товар добавлен в список желаемого');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Произошла ошибка при добавлении товара');
+            });
+        }
+
+        // Вызываем проверку при загрузке страницы
+        document.addEventListener('DOMContentLoaded', checkWishlistItems);
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchTerm = this.querySelector('input[name="query"]').value;
+            if (searchTerm.trim()) {
+                window.location.href = `/Home/Search?query=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+@model IEnumerable<hazinDNS_v2.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Оформление заказа";
+    var totalAmount = ViewBag.TotalAmount;
+    var userBalance = ViewBag.UserBalance;
+}
+
+<div class="container mt-4">
+    <h2>Оформление заказа</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Товары в заказе</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Цена</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Product.Name</td>
+                                        <td>@item.Product.Price.ToString("C")</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@((item.Product.Price * item.Quantity).ToString("C"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Адрес доставки</h5>
+                    <div class="mb-3">
+                        <textarea id="deliveryAddress" class="form-control" rows="3" 
+                                placeholder="Введите адрес доставки"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="deliveryCity" class="form-control" placeholder="Город доставки">
+                    </div>
+                    <div class="mb-3">
+                        <textarea id="comment" class="form-control" rows="3" placeholder="Комментарий"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Информация о заказе</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Сумма заказа</label>
+                        <p class="form-control-static">@totalAmount.ToString("C")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ваш баланс</label>
+                        <p class="form-control-static">@userBalance.ToString("C")</p>
+                    </div>
+                    @if (userBalance < totalAmount)
+                    {
+                        <div class="alert alert-warning">
+                            Недостаточно средств на балансе. 
+                            <a href="/Balance" class="alert-link">Пополнить баланс</a>
+                        </div>
+                    }
+                    <button class="btn btn-primary w-100" onclick="placeOrder()"
+                            @(userBalance < totalAmount ? "disabled" : "")>
+                        Оформить заказ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function placeOrder() {
+            const data = {
+                deliveryAddress: document.getElementById('deliveryAddress').value,
+                deliveryCity: document.getElementById('deliveryCity').value,
+                comment: document.getElementById('comment')?.value
+            };
+
+            fetch('/Order/PlaceOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    toastr.success(result.message);
+                    // Очищаем форму
+                    document.getElementById('deliveryAddress').value = '';
+                    document.getElementById('deliveryCity').value = '';
+                    document.getElementById('comment').value = '';
+                } else {
+                    toastr.error(result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                toastr.error('Произошла ошибка при оформлении заказа');
+            });
+        }
+    </script>
+} 

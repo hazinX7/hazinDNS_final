@@ -1,0 +1,46 @@
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Профиль пользователя";
+}
+
+<div class="container mt-4">
+    <h2>Профиль пользователя</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Имя пользователя</h5>
+            <p>@User.Identity?.Name</p>
+
+            <h5>Email</h5>
+            <p>admin@hazindns.com</p>
+
+            <h5>Роль</h5>
+            <p>Admin</p>
+
+            <h5>Баланс</h5>
+            <p>9 999 952 000,08 ₽</p>
+
+            <div class="d-flex gap-2">
+                <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-primary">
+                    <i class="bi bi-key"></i> Сменить пароль
+                </a>
+                <a class="btn btn-primary" href="/Balance">
+                    <i class="bi bi-wallet2"></i> Пополнить баланс
+                </a>
+                <a class="btn btn-info" href="/Orders">
+                    <i class="bi bi-clock-history"></i> История заказов
+                </a>
+                <a class="btn btn-danger" href="#" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </a>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,44 @@
+@model IEnumerable<string>
+
+@{
+    ViewData["Title"] = "Категории товаров";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Категории товаров</h2>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var category in Model)
+        {
+            <div class="col">
+                <div class="card h-100 category-card">
+                    <div class="card-body">
+                        <h5 class="card-title">@category</h5>
+                        <a href="@Url.Action("Products", "Category", new { category = category })" 
+                           class="btn btn-outline-primary stretched-link">
+                            Перейти к товарам
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.category-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+</style> 

@@ -1,0 +1,44 @@
+@model IEnumerable<hazinDNS_v2.Models.Product>
+
+@{
+    ViewData["Title"] = $"Товары категории {ViewBag.CategoryName}";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewBag.CategoryName</h2>
+        <a href="@Url.Action("Index", "Category")" class="btn btn-outline-primary">
+            <i class="bi bi-grid"></i> Все категории
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            В данной категории пока нет товаров
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="product-image-container">
+                            <img src="@product.ImageUrl" class="product-image" alt="@product.Name">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text flex-grow-1">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="product-price">@product.Price.ToString("C")</span>
+                                <button class="btn btn-primary" onclick="addToCart(@product.Id)">В корзину</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div> 

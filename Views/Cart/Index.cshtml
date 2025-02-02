@@ -1,0 +1,187 @@
+@model IEnumerable<hazinDNS_v2.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Корзина";
+    var totalItems = Model?.Sum(item => item.Quantity) ?? 0;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container mt-4">
+    <h2>Корзина (@(Model?.Sum(x => x.Quantity) ?? 0))</h2>
+
+    @if (Model?.Any() == true)
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">Товар</th>
+                        <th style="width: 15%">Цена</th>
+                        <th style="width: 20%" class="text-center">Количество</th>
+                        <th style="width: 15%">Итого</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name" 
+                                         style="width: 80px; height: 80px; object-fit: contain; margin-right: 15px;">
+                                    <span>@item.Product.Name</span>
+                                </div>
+                            </td>
+                            <td class="align-middle">@item.Product.Price ₽</td>
+                            <td>
+                                <div class="quantity-controls justify-content-center align-items-center">
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                            onclick="updateQuantity(@item.ProductId, -1)">-</button>
+                                    <span class="quantity-value mx-2" id="quantity-@item.ProductId">
+                                        @item.Quantity
+                                    </span>
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                            onclick="updateQuantity(@item.ProductId, 1)">+</button>
+                                </div>
+                            </td>
+                            <td class="align-middle">@(item.Product.Price * item.Quantity) ₽</td>
+                            <td class="align-middle">
+                                <button class="btn btn-danger btn-sm" 
+                                        onclick="removeFromCart(@item.ProductId)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Общая сумма:</strong></td>
+                        <td><strong>@Model.Sum(x => x.Product.Price * x.Quantity) ₽</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger me-2" onclick="clearCart()">Очистить корзину</button>
+                <a href="/Order/Checkout" class="btn btn-primary">Оформить заказ</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Ваша корзина пуста
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function removeFromCart(productId) {
+            if (confirm('Вы уверены, что хотите удалить этот товар из корзины?')) {
+                fetch('/Cart/RemoveFromCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId: productId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        function clearCart() {
+            if (confirm('Вы уверены, что хотите очистить корзину?')) {
+                fetch('/Cart/ClearCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        function updateQuantity(productId, delta) {
+            fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId: productId, delta: delta })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function createOrder() {
+            // ... существующий код сбора данных заказа ...
+
+            fetch('/Order/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Заказ оформлен!',
+                        text: 'Ваш заказ успешно оформлен и принят в обработку',
+                        icon: 'success',
+                        confirmButtonText: 'Отлично',
+                        confirmButtonColor: '#28a745',
+                        showConfirmButton: true,
+                        timer: 3000,
+                        timerProgressBar: true
+                    }).then((result) => {
+                        window.location.href = '/Order/History';  // или другая страница после оформления заказа
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: data.message || 'Произошла ошибка при оформлении заказа',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Ошибка',
+                    text: 'Произошла ошибка при оформлении заказа',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+    </script>
+}

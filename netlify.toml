@@ -1,0 +1,9 @@
+[build]
+    command = "dotnet publish hazinDNS_v2.csproj -c Release -o publish"
+    publish = "publish"
+    functions = "netlify/functions"
+
+[[redirects]]
+    from = "/*"
+    to = "/index.html"
+    status = 200

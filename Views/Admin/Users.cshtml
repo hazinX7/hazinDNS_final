@@ -1,0 +1,76 @@
+@model IEnumerable<User>
+
+@{
+    ViewData["Title"] = "Управление пользователями";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mt-4">
+    <h2>Управление пользователями</h2>
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Баланс</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Email</td>
+                        <td>
+                            <span id="balance-@user.Id">@user.Balance.ToString("N2") ₽</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="editBalance('@user.Id', @user.Balance)">
+                                Изменить баланс
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editBalance(userId, currentBalance) {
+            Swal.fire({
+                title: 'Изменить баланс',
+                input: 'number',
+                inputValue: currentBalance,
+                showCancelButton: true,
+                confirmButtonText: 'Сохранить',
+                cancelButtonText: 'Отмена'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/UpdateBalance',
+                        type: 'POST',
+                        data: {
+                            id: parseInt(userId),
+                            balance: parseFloat(result.value)
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                toastr.error(response.message || 'Не удалось обновить баланс');
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Произошла ошибка при обновлении баланса');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+} 
